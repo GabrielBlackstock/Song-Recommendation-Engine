@@ -1,0 +1,124 @@
+import numpy as np
+import pandas as pd
+from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.impute import SimpleImputer
+
+# Define the data for songs, genres, and artists
+songs_data = {
+    'track_id': [f"t{i+1}" for i in range(80)],
+    'song_title': [
+        "Where You Are", "10:35", "Rhyme Dust", "Padam Padam", "Miracle", "Praising You",
+        "AM:PM", "You Got Me", "Baby Don't Hurt Me", "Whistle", "Luv Me a Little", "If Only I",
+        "Other Side", "No Sleep", "V I B R A T I O N", "Hungry Heart", "Let Me Go", "Beggin'",
+        "I Want You", "16 Again", "The Weeping Poets", "Wish Me Well", "Patty Cake", "First Person Shooter",
+        "Hood Rats", "Booty Drop", "TESLA", "toxic", "On The Radar Freestyle", "On This Side",
+        "Sprinter", "Jonesboro", "Scientists & Engineers", "Trapper Of The Year", "fukumean",
+        "Chester Watson", "Estee Nack x Westside Gunn", "The Hillbillies", "Paint the Town Red",
+        "Rio Da Yung Og", "Lost", "Under You", "Fighting Myself", "Farewell For Now", "Love From the Other Side",
+        "Surrender", "Rescued", "Jesus He Knows Me", "72 Seasons", "Paper Machine", "Meeting The Master",
+        "The Glass", "LosT", "If Darkness Had a Son", "Sacred The Thread", "Emotion Sickness", "Show Me How",
+        "Light My Love", "Watch the World Burn", "Watch Me Burn", "Flowers", "Sprinter", "Escapism", "Anti-Hero",
+        "Miracle", "Calm Down", "Kill Bill", "Boy's a Liar", "As It Was", "People", "Cruel Summer", "Sure Thing",
+        "I'm Good (Blue)", "Vampire", "Messy in Heaven", "Daylight", "Die for You", "Last Christmas", "Dance the Night",
+        "React"
+    ],
+    'artist': [
+        "John Summit & Hayla", "Tiësto ft. Tate McRae", "MK & Dom Dolla", "Kylie Minogue", "Calvin Harris ft. Ellie Goulding",
+        "Rita Ora ft. Fatboy Slim", "NOTD & Maia Wright", "TELYKAST & Georgia Ku", "David Guetta ft. Anne-Marie & Coi Leray",
+        "Jax Jones & Calum Scott", "ILLENIUM & Nina Nesbitt", "Loud Luxury, Two Friends, Bebe Rexha",
+        "ILLENIUM, Said The Sky & Vera Blue", "Regard x Ella Henderson", "Kaleena Zanders & Shift K3Y",
+        "Steve Aoki, Galantis, Hayley Kiyoko", "Theresa Rex ft. AFROJACK", "Chris Lake & Aluna",
+        "Icona Pop & Galantis", "Paul Woolford x Lewis Thompson x MNEK", "Vic Mensa ft. Jay Electronica", "Little Brother",
+        "Quavo & Takeoff", "Drake ft. J. Cole", "Sexyy Red & Sukihana", "Doechii", "Lil Yachty", "Noname",
+        "Drake & Central Cee", "Brent Faiyaz, Cruddy Murda, ASAP Ant", "Central Cee & Dave", "Young Thug",
+        "Killer Mike ft. Andre 3000, Future, Eryn Allen Kane", "Certified Trapper", "Gunna", "Chester Watson",
+        "Estee Nack x Westside Gunn", "Baby Keem x Kendrick Lamar", "Doja Cat", "Rio Da Yung Og",
+        "Linkin Park", "Foo Fighters", "Linkin Park", "Greta Van Fleet", "Fall Out Boy", "Godsmack",
+        "Foo Fighters", "Ghost", "Metallica", "Queens of the Stone Age", "Greta Van Fleet", "Foo Fighters",
+        "Bring Me The Horizon", "Metallica", "Greta Van Fleet", "Queens of the Stone Age", "Foo Fighters",
+        "Greta Van Fleet", "Falling In Reverse", "Atreyu", "Miley Cyrus", "Dave & Central Cee", "RAYE ft 070 Shake",
+        "Taylor Swift", "Calvin Harris/Ellie Goulding", "Rema", "SZA", "PinkPantheress", "Harry Styles",
+        "Libianca", "Taylor Swift", "Miguel", "David Guetta & Bebe Rexha", "Olivia Rodrigo", "Venbee & Goddard",
+        "David Kushner", "The Weeknd", "WHAM!", "Dua Lipa", "Switch Disco & Ella Henderson"
+    ],
+    'genre': [
+        'Dance', 'Dance', 'Dance', 'Dance', 'Dance', 'Dance', 'Dance', 'Dance', 'Dance', 'Dance',
+        'Dance', 'Dance', 'Dance', 'Dance', 'Dance', 'Dance', 'Dance', 'Dance', 'Dance', 'Dance',
+        'Hip-Hop', 'Hip-Hop', 'Hip-Hop', 'Hip-Hop', 'Hip-Hop', 'Hip-Hop', 'Hip-Hop', 'Hip-Hop', 'Hip-Hop', 'Hip-Hop',
+        'Hip-Hop', 'Hip-Hop', 'Hip-Hop', 'Hip-Hop', 'Hip-Hop', 'Hip-Hop', 'Hip-Hop', 'Hip-Hop', 'Hip-Hop', 'Hip-Hop',
+        'Rock', 'Rock', 'Rock', 'Rock', 'Rock', 'Rock', 'Rock', 'Rock', 'Rock', 'Rock',
+        'Rock', 'Rock', 'Rock', 'Rock', 'Rock', 'Rock', 'Rock', 'Rock', 'Rock', 'Rock',
+        'Pop', 'Pop', 'Pop', 'Pop', 'Pop', 'Pop', 'Pop', 'Pop', 'Pop', 'Pop', 'Pop', 'Pop', 'Pop', 'Pop', 'Pop',
+        'Pop', 'Pop', 'Pop', 'Pop', 'Pop'
+    ]
+}
+
+# Create a DataFrame from song data
+df = pd.DataFrame(songs_data)
+
+# Number of users
+num_users = 500
+
+# Generate random user ratings
+user_item_matrix = np.full((num_users, len(df)), np.nan)
+
+# Simulate user ratings
+for user in range(num_users):
+    for _ in range(60):
+        song_idx = np.random.randint(0, len(df))
+        genre = df.loc[song_idx, 'genre']
+        top_genre = np.random.choice(['Hip-Hop', 'Pop', 'Rock', 'Dance'], p=[0.25, 0.25, 0.25, 0.25])
+        if genre == top_genre:
+            rating = np.random.choice([4, 5], p=[0.5, 0.5])
+        else:
+            rating = np.random.randint(1, 6)
+        user_item_matrix[user, song_idx] = rating
+
+# Function to calculate similarity between users
+def calculate_similarity(matrix):
+    imputer = SimpleImputer(strategy='constant', fill_value=0)
+    matrix_filled = imputer.fit_transform(matrix)
+    similarity = cosine_similarity(matrix_filled)
+    return similarity
+
+# Function to recommend songs based on user similarity and genre preference
+def recommend_songs(user_index, matrix, df, num_recommendations=5):
+    print(f"Calculating recommendations for user {user_index+1}")
+    similarity = calculate_similarity(matrix)
+    similar_users = np.argsort(-similarity[user_index])[:20]  # Top 20 similar users
+
+    # Determine the most preferred genre for the current user based on average ratings
+    user_ratings = matrix[user_index]
+    genre_ratings = {}
+    for idx, rating in enumerate(user_ratings):
+        if not np.isnan(rating):
+            genre = df.loc[idx, 'genre']
+            if genre not in genre_ratings:
+                genre_ratings[genre] = []
+            genre_ratings[genre].append(rating)
+    favorite_genre = max(genre_ratings, key=lambda x: np.mean(genre_ratings[x]))
+
+    # Recommend songs from the favorite genre
+    recommended_songs = df[df['genre'] == favorite_genre].sample(n=num_recommendations)
+    return recommended_songs[['track_id', 'song_title', 'artist', 'genre']]
+
+# Function to print user 1's song ratings
+def print_user_ratings(user_index, matrix, df):
+    user_ratings = matrix[user_index]
+    ratings_data = {'song_title': [], 'rating': [], 'genre': []}
+    for idx, rating in enumerate(user_ratings):
+        if not np.isnan(rating):
+            ratings_data['song_title'].append(df.loc[idx, 'song_title'])
+            ratings_data['rating'].append(rating)
+            ratings_data['genre'].append(df.loc[idx, 'genre'])
+    ratings_df = pd.DataFrame(ratings_data)
+    print(f"User {user_index+1}'s Song Ratings:")
+    print(ratings_df)
+
+# Print User 1's song ratings
+print_user_ratings(0, user_item_matrix, df)
+
+# Get recommendations for User 1
+recommended_playlist = recommend_songs(0, user_item_matrix, df)
+print("Songs for You - Playlist Recommendations for User 1:")
+print(recommended_playlist)
